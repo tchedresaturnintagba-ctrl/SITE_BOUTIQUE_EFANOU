@@ -1,5 +1,8 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 
+export type CheckoutPaymentMethod = 'mixx_by_yas' | 'flooz'
+export type PaymentMethod = CheckoutPaymentMethod | 'mobile_money' | 'card' | 'cash_on_delivery'
+
 export type ApiProduct = {
   id: string
   categoryId: string
@@ -33,7 +36,7 @@ export type ApiOrder = {
   shippingAddress: { city: string; commune: string; address: string; landmark?: string }
   notes: string | null
   status: 'pending' | 'confirmed' | 'preparing' | 'shipped' | 'delivered' | 'cancelled'
-  paymentMethod: 'mobile_money' | 'card' | 'cash_on_delivery'
+  paymentMethod: PaymentMethod
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'
   subtotal: number
   shippingFee: number
@@ -81,7 +84,7 @@ export const storefrontApi = {
     customerEmail?: string
     customerPhone: string
     shippingAddress: { city: string; commune: string; address: string; landmark?: string }
-    paymentMethod: 'mobile_money' | 'card' | 'cash_on_delivery'
+    paymentMethod: CheckoutPaymentMethod
     notes?: string
     items: Array<{ productId: string; quantity: number }>
   }) => apiRequest<{ order: { id: string; orderNumber: string; total: number; status: string } }>('/orders', {

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { ArrowLeft, Check, LoaderCircle, TriangleAlert } from 'lucide-react'
-import { storefrontApi } from './api'
+import { storefrontApi, type CheckoutPaymentMethod } from './api'
 
 type CheckoutItem = { id: string; quantity: number }
 
@@ -30,7 +30,7 @@ export default function CheckoutForm({ items, onBack, onSuccess }: {
           address: String(form.get('address')),
           landmark: String(form.get('landmark')),
         },
-        paymentMethod: String(form.get('paymentMethod')) as 'mobile_money' | 'card' | 'cash_on_delivery',
+        paymentMethod: String(form.get('paymentMethod')) as CheckoutPaymentMethod,
         notes: String(form.get('notes')),
         items: items.map((item) => ({ productId: item.id, quantity: item.quantity })),
       })
@@ -68,18 +68,18 @@ export default function CheckoutForm({ items, onBack, onSuccess }: {
         </div>
       </fieldset>
       <fieldset>
-        <legend>Adresse de livraison</legend>
+        <legend>Adresse de livraison à Lomé</legend>
         <div className="checkout-row">
-          <label>Ville<input name="city" defaultValue="Abidjan" required /></label>
-          <label>Commune<input name="commune" required /></label>
+          <label>Ville<input name="city" value="Lomé" readOnly /></label>
+          <label>Quartier<input name="commune" autoComplete="address-level3" required /></label>
         </div>
         <label>Adresse complète<textarea name="address" rows={3} minLength={5} required /></label>
         <label>Point de repère <small>facultatif</small><input name="landmark" /></label>
       </fieldset>
       <fieldset>
-        <legend>Paiement</legend>
-        <label className="checkout-radio"><input type="radio" name="paymentMethod" value="mobile_money" defaultChecked /><span><strong>Mobile Money</strong><small>Orange, MTN, Moov ou Wave</small></span></label>
-        <label className="checkout-radio"><input type="radio" name="paymentMethod" value="cash_on_delivery" /><span><strong>À la livraison</strong><small>Paiement remis au livreur</small></span></label>
+        <legend>Moyen de paiement</legend>
+        <label className="checkout-radio"><input type="radio" name="paymentMethod" value="mixx_by_yas" defaultChecked /><span><strong>Mixx by Yas</strong><small>Paiement Mobile Money</small></span></label>
+        <label className="checkout-radio"><input type="radio" name="paymentMethod" value="flooz" /><span><strong>Flooz</strong><small>Paiement Mobile Money</small></span></label>
       </fieldset>
       <label>Note <small>facultatif</small><textarea name="notes" rows={2} /></label>
       <button className="checkout-submit" type="submit" disabled={loading}>

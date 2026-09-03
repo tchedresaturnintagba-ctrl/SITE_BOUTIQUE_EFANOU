@@ -2,6 +2,8 @@ import cors from 'cors'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { DatabaseError } from 'pg'
 import { config } from './config.js'
 import { query } from './db.js'
@@ -31,6 +33,18 @@ app.use('/api/auth', authRouter)
 app.use('/api', productsRouter)
 app.use('/api', ordersRouter)
 app.use('/api/admin', adminRouter)
+
+if (config.NODE_ENV === 'production') {
+  const staticDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist')
+  app.use(express.static(staticDirectory))
+  app.use((request, response, next) => {
+    if (request.method !== 'GET' || request.path.startsWith('/api/')) {
+      next()
+      return
+    }
+    response.sendFile(path.join(staticDirectory, 'index.html'))
+  })
+}
 
 app.use((_request, response) => {
   response.status(404).json({ message: 'Route introuvable.' })

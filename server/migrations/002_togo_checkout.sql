@@ -1,0 +1,12 @@
+ALTER TABLE orders
+  DROP CONSTRAINT IF EXISTS orders_payment_method_check;
+
+ALTER TABLE orders
+  ADD CONSTRAINT orders_payment_method_check
+  CHECK (payment_method IN (
+    'mixx_by_yas',
+    'flooz',
+    'mobile_money',
+    'card',
+    'cash_on_delivery'
+  ));

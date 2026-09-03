@@ -7,12 +7,12 @@ const orderSchema = z.object({
   customerEmail: z.string().email().optional().or(z.literal('')),
   customerPhone: z.string().trim().min(8).max(30),
   shippingAddress: z.object({
-    city: z.string().trim().min(2).max(100),
+    city: z.literal('Lomé'),
     commune: z.string().trim().min(2).max(100),
     address: z.string().trim().min(5).max(250),
     landmark: z.string().trim().max(250).optional(),
   }),
-  paymentMethod: z.enum(['mobile_money', 'card', 'cash_on_delivery']),
+  paymentMethod: z.enum(['mixx_by_yas', 'flooz']),
   notes: z.string().trim().max(500).optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),

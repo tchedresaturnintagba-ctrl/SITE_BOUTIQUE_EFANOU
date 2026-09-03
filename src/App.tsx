@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import {
   ArrowRight,
   Check,
+  CircleHelp,
   Heart,
   Leaf,
+  MessageCircle,
   Menu,
   Minus,
   PackageCheck,
@@ -150,7 +152,7 @@ function StorefrontApp() {
     <div className="site-shell">
       <div className="announcement">
         <p><Truck size={15} /> Livraison offerte à partir de 35 000 FCFA</p>
-        <span>Abidjan & livraison nationale</span>
+        <span>Lomé & livraison nationale</span>
       </div>
 
       <header className="site-header">
@@ -162,7 +164,7 @@ function StorefrontApp() {
           <a href="#boutique">Boutique</a>
           <a href="#histoire">Notre histoire</a>
           <a href="#engagements">Nos engagements</a>
-          <a href="#contact">Contact</a>
+          <a href="#aide">Contact</a>
         </nav>
         <div className="header-actions">
           <a className="icon-button desktop-only" href="#boutique" aria-label="Rechercher"><Search size={20} /></a>
@@ -190,7 +192,7 @@ function StorefrontApp() {
         <section className="promise-strip" aria-label="Nos garanties">
           <div><Snowflake size={21} /><span><strong>Fraîcheur longue durée</strong>Isolation multicouche</span></div>
           <div><ShieldCheck size={21} /><span><strong>Qualité sélectionnée</strong>Matériaux résistants</span></div>
-          <div><PackageCheck size={21} /><span><strong>Livraison soignée</strong>Partout en Côte d'Ivoire</span></div>
+          <div><PackageCheck size={21} /><span><strong>Livraison soignée</strong>Partout au Togo</span></div>
         </section>
 
         <section className="shop-section" id="boutique">
@@ -250,6 +252,47 @@ function StorefrontApp() {
           </div>
         </section>
 
+        <section className="help-section" id="aide">
+          <div className="help-heading">
+            <p className="eyebrow gold"><CircleHelp size={15} /> Service client</p>
+            <h2>Besoin d'aide ?</h2>
+            <p>Retrouvez ici les réponses essentielles ou contactez directement Horizon Efanou.</p>
+          </div>
+          <div className="help-grid">
+            <article className="help-panel">
+              <MessageCircle size={22} />
+              <h3>Nous contacter</h3>
+              <p>Une question sur un sac ou une commande ? Notre équipe vous répond par téléphone ou sur TikTok.</p>
+              <div className="help-actions">
+                <a href="tel:+22896339899"><Phone size={16} /> Appeler</a>
+                <a href="https://tiktok.com/@horizonefanou" target="_blank" rel="noreferrer">Écrire sur TikTok</a>
+              </div>
+            </article>
+            <article className="help-panel" id="livraison-retours">
+              <PackageCheck size={22} />
+              <h3>Livraison & retours</h3>
+              <p>Nous livrons à Lomé et partout au Togo. La livraison est offerte à partir de 35 000 FCFA.</p>
+              <p>Pour toute demande de retour, contactez-nous avant l'envoi afin de recevoir les instructions adaptées à votre commande.</p>
+            </article>
+            <div className="help-panel help-faq" id="faq">
+              <CircleHelp size={22} />
+              <h3>Questions fréquentes</h3>
+              <details>
+                <summary>Comment passer une commande ?</summary>
+                <p>Ajoutez vos articles au panier, renseignez votre adresse à Lomé, puis confirmez la commande.</p>
+              </details>
+              <details>
+                <summary>Quels paiements acceptez-vous ?</summary>
+                <p>Vous pouvez payer avec Mixx by Yas ou Flooz.</p>
+              </details>
+              <details>
+                <summary>Comment suivre ma commande ?</summary>
+                <p>Conservez le numéro affiché après la commande. Nous vous contacterons pour confirmer la livraison.</p>
+              </details>
+            </div>
+          </div>
+        </section>
+
         <section className="newsletter" id="contact">
           <div><p className="eyebrow"><Sparkles size={15} /> Le cercle Efanou</p><h2>Un peu de fraîcheur dans votre boîte mail.</h2><p>Nouveautés, conseils et offres privées, sans surcharge.</p></div>
           <form onSubmit={(event) => { event.preventDefault(); setNotice('Merci ! Votre inscription est enregistrée.'); event.currentTarget.reset() }}>
@@ -265,9 +308,9 @@ function StorefrontApp() {
           <p>Les sacs isothermes qui prennent soin de vos repas et de votre style.</p>
         </div>
         <div className="footer-column"><h3>Explorer</h3><a href="#boutique">La boutique</a><a href="#histoire">Notre histoire</a><a href="#engagements">Nos engagements</a></div>
-        <div className="footer-column"><h3>Besoin d'aide ?</h3><a href="mailto:bonjour@horizon-efanou.com">Nous écrire</a><a href="#contact">Livraison & retours</a><a href="#contact">Questions fréquentes</a></div>
-        <div className="footer-column"><h3>Nous retrouver</h3><a href="tel:+2250000000000"><Phone size={15} /> +225 00 00 00 00 00</a><a href="#contact">Instagram</a></div>
-        <div className="footer-bottom"><span>© 2026 Horizon Efanou</span><span>Paiement sécurisé · Mobile Money · Carte bancaire</span></div>
+        <div className="footer-column"><h3>Besoin d'aide ?</h3><a href="#aide">Nous contacter</a><a href="#livraison-retours">Livraison & retours</a><a href="#faq">Questions fréquentes</a></div>
+        <div className="footer-column"><h3>Nous retrouver</h3><a href="tel:+22896339899"><Phone size={15} /> +228 96 33 98 99</a><a href="https://tiktok.com/@horizonefanou" target="_blank" rel="noreferrer">TikTok</a></div>
+        <div className="footer-bottom"><span>© 2026 Horizon Efanou</span><span>Paiement sécurisé · Mixx by Yas · Flooz</span></div>
       </footer>
 
       {(cartOpen || menuOpen) && <button className="page-overlay" type="button" aria-label="Fermer" onClick={closePanels} />}
@@ -296,9 +339,9 @@ function StorefrontApp() {
           <a href="#boutique" onClick={() => setMenuOpen(false)}>Boutique <ArrowRight size={18} /></a>
           <a href="#histoire" onClick={() => setMenuOpen(false)}>Notre histoire <ArrowRight size={18} /></a>
           <a href="#engagements" onClick={() => setMenuOpen(false)}>Nos engagements <ArrowRight size={18} /></a>
-          <a href="#contact" onClick={() => setMenuOpen(false)}>Contact <ArrowRight size={18} /></a>
+          <a href="#aide" onClick={() => setMenuOpen(false)}>Contact <ArrowRight size={18} /></a>
         </nav>
-        <div className="mobile-menu-note"><Phone size={18} /><span>Une question ?<strong>+225 00 00 00 00 00</strong></span></div>
+        <a className="mobile-menu-note" href="tel:+22896339899"><Phone size={18} /><span>Une question ?<strong>+228 96 33 98 99</strong></span></a>
       </aside>
 
       {notice && <div className="toast" role="status"><Check size={18} /> {notice}</div>}
