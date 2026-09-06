@@ -55,6 +55,33 @@ const catalogueQuerySchema = z.object({
 
 export const productsRouter = Router()
 
+productsRouter.get('/product-images/:id', async (request, response) => {
+  const imageId = z.string().uuid().safeParse(request.params.id)
+  if (!imageId.success) {
+    response.status(404).end()
+    return
+  }
+
+  const result = await query<{ mimeType: string; imageData: Buffer }>(
+    `SELECT mime_type AS "mimeType", image_data AS "imageData"
+     FROM product_images
+     WHERE id = $1`,
+    [imageId.data],
+  )
+  const image = result.rows[0]
+
+  if (!image) {
+    response.status(404).end()
+    return
+  }
+
+  response.set({
+    'Content-Type': image.mimeType,
+    'Cache-Control': 'public, max-age=31536000, immutable',
+  })
+  response.send(image.imageData)
+})
+
 productsRouter.get('/categories', async (_request, response) => {
   const result = await query<{ id: string; name: string; slug: string }>(
     `SELECT id, name, slug FROM categories ORDER BY display_order, name`,

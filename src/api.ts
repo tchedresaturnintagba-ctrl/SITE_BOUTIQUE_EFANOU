@@ -64,7 +64,7 @@ export class ApiError extends Error {
 
 async function apiRequest<Response>(path: string, options: RequestOptions = {}) {
   const headers = new Headers(options.headers)
-  if (options.body) headers.set('Content-Type', 'application/json')
+  if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
   if (options.token) headers.set('Authorization', `Bearer ${options.token}`)
 
   const response = await fetch(`${API_URL}${path}`, { ...options, headers })
@@ -107,6 +107,13 @@ export const adminApi = {
     apiRequest<{ products: ApiProduct[] }>('/admin/products', { token }),
   categories: () =>
     apiRequest<{ categories: Array<{ id: string; name: string; slug: string }> }>('/categories'),
+  uploadProductImage: (token: string, file: File) =>
+    apiRequest<{ imageUrl: string }>('/admin/product-images', {
+      method: 'POST',
+      token,
+      headers: { 'Content-Type': file.type },
+      body: file,
+    }),
   createProduct: (token: string, product: ProductInput) =>
     apiRequest<{ product: ApiProduct }>('/admin/products', { method: 'POST', token, body: JSON.stringify(product) }),
   updateProduct: (token: string, id: string, product: ProductInput) =>

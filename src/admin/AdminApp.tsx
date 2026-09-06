@@ -106,11 +106,12 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
   )
 }
 
-function ProductEditor({ product, categories, onClose, onSave }: {
+function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
   product: ApiProduct | null
   categories: Category[]
   onClose: () => void
   onSave: (input: ProductInput) => Promise<void>
+  onUpload: (file: File) => Promise<string>
 }) {
   const [draft, setDraft] = useState<ProductInput>(() => product ? {
     categoryId: product.categoryId,
@@ -131,9 +132,22 @@ function ProductEditor({ product, categories, onClose, onSave }: {
   } : emptyProduct(categories[0]?.id))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState(product?.imageUrl || '')
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview.startsWith('blob:')) URL.revokeObjectURL(imagePreview)
+    }
+  }, [imagePreview])
 
   const setField = <Key extends keyof ProductInput>(key: Key, value: ProductInput[Key]) => {
     setDraft((current) => ({ ...current, [key]: value }))
+  }
+
+  const selectImage = (file: File | null) => {
+    setImageFile(file)
+    setImagePreview(file ? URL.createObjectURL(file) : product?.imageUrl || '')
   }
 
   const submit = async (event: FormEvent) => {
@@ -141,7 +155,12 @@ function ProductEditor({ product, categories, onClose, onSave }: {
     setSaving(true)
     setError('')
     try {
-      await onSave(draft)
+      const imageUrl = imageFile ? await onUpload(imageFile) : draft.imageUrl
+      await onSave({
+        ...draft,
+        imageKey: imageFile ? null : draft.imageKey,
+        imageUrl,
+      })
       onClose()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Enregistrement impossible.')
@@ -168,7 +187,8 @@ function ProductEditor({ product, categories, onClose, onSave }: {
             <label>Statut<select value={draft.status} onChange={(event) => setField('status', event.target.value as ProductInput['status'])}><option value="draft">Brouillon</option><option value="active">En vente</option><option value="archived">Archivé</option></select></label>
             <label>Couleur<input value={draft.color} onChange={(event) => setField('color', event.target.value)} required /></label>
             <label>Teinte<input type="color" value={draft.colorHex} onChange={(event) => setField('colorHex', event.target.value)} /></label>
-            <label className="field-wide">URL de l'image<input type="url" value={draft.imageUrl ?? ''} onChange={(event) => setField('imageUrl', event.target.value || null)} placeholder={draft.imageKey ? 'Photo locale déjà associée' : 'https://...'} required={!draft.imageKey} /></label>
+            <label className="field-wide">Photo du produit<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => selectImage(event.target.files?.[0] || null)} required={!draft.imageUrl && !draft.imageKey} /></label>
+            {imagePreview && <div className="product-image-preview field-wide"><img src={imagePreview} alt="Aperçu du produit" /></div>}
             <label>Badge<input value={draft.badge ?? ''} onChange={(event) => setField('badge', event.target.value || null)} placeholder="Nouveau" /></label>
             <label className="checkbox-field"><input type="checkbox" checked={draft.isFeatured} onChange={(event) => setField('isFeatured', event.target.checked)} /> Mettre en avant</label>
           </div>
@@ -301,7 +321,7 @@ export default function AdminApp() {
         </div>
       </main>
 
-      {editingProduct !== undefined && <ProductEditor product={editingProduct} categories={categories} onClose={() => setEditingProduct(undefined)} onSave={saveProduct} />}
+      {editingProduct !== undefined && <ProductEditor product={editingProduct} categories={categories} onClose={() => setEditingProduct(undefined)} onSave={saveProduct} onUpload={(file) => adminApi.uploadProductImage(token, file).then(({ imageUrl }) => imageUrl)} />}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { raw, Router } from 'express'
 import { z } from 'zod'
 import { pool, query } from '../db.js'
 import { requireAdmin } from '../middleware/auth.js'
@@ -18,7 +18,10 @@ const productSchema = z.object({
   color: z.string().trim().min(2).max(80),
   colorHex: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   imageKey: z.string().trim().max(80).nullable().optional(),
-  imageUrl: z.string().url().nullable().optional(),
+  imageUrl: z.union([
+    z.string().url().refine((url) => new URL(url).protocol === 'https:', 'L’image doit utiliser HTTPS.'),
+    z.string().regex(/^\/api\/product-images\/[0-9a-f-]{36}$/),
+  ]).nullable().optional(),
   badge: z.string().trim().max(50).nullable().optional(),
   status: z.enum(['draft', 'active', 'archived']),
   isFeatured: z.boolean(),
@@ -40,6 +43,32 @@ const orderUpdateSchema = z.object({
 
 export const adminRouter = Router()
 adminRouter.use(requireAdmin)
+
+adminRouter.post(
+  '/product-images',
+  raw({ type: ['image/jpeg', 'image/png', 'image/webp'], limit: '5mb' }),
+  async (request, response) => {
+    if (!Buffer.isBuffer(request.body) || request.body.length === 0) {
+      response.status(400).json({ message: 'Sélectionnez une image JPEG, PNG ou WebP.' })
+      return
+    }
+
+    const mimeType = request.headers['content-type']
+    if (!mimeType || !['image/jpeg', 'image/png', 'image/webp'].includes(mimeType)) {
+      response.status(415).json({ message: 'Format d’image non pris en charge.' })
+      return
+    }
+
+    const result = await query<{ id: string }>(
+      `INSERT INTO product_images (mime_type, image_data)
+       VALUES ($1, $2)
+       RETURNING id`,
+      [mimeType, request.body],
+    )
+
+    response.status(201).json({ imageUrl: `/api/product-images/${result.rows[0]?.id}` })
+  },
+)
 
 adminRouter.get('/dashboard', async (_request, response) => {
   const [summary, recentOrders, lowStock] = await Promise.all([
