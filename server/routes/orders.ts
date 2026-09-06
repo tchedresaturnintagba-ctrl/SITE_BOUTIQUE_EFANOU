@@ -88,8 +88,8 @@ ordersRouter.post('/orders', async (request, response) => {
       return { product, quantity: item.quantity, lineTotal }
     })
 
-    const shippingFee = subtotal >= 35000 ? 0 : 2500
-    const total = subtotal + shippingFee
+    const shippingFee = 0
+    const total = subtotal
     const orderResult = await client.query<CreatedOrder>(
       `INSERT INTO orders (
          customer_name, customer_email, customer_phone, shipping_address,

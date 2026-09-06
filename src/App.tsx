@@ -151,7 +151,7 @@ function StorefrontApp() {
   return (
     <div className="site-shell">
       <div className="announcement">
-        <p><Truck size={15} /> Livraison offerte à partir de 35 000 FCFA</p>
+        <p><Truck size={15} /> Livraison calculée selon la distance</p>
         <span>Lomé & livraison nationale</span>
       </div>
 
@@ -271,7 +271,7 @@ function StorefrontApp() {
             <article className="help-panel" id="livraison-retours">
               <PackageCheck size={22} />
               <h3>Livraison & retours</h3>
-              <p>Nous livrons à Lomé et partout au Togo. La livraison est offerte à partir de 35 000 FCFA.</p>
+              <p>Nous livrons à Lomé et partout au Togo. Les frais sont déterminés selon la distance à parcourir par le livreur et confirmés avant l'expédition.</p>
               <p>Pour toute demande de retour, contactez-nous avant l'envoi afin de recevoir les instructions adaptées à votre commande.</p>
             </article>
             <div className="help-panel help-faq" id="faq">
@@ -330,7 +330,7 @@ function StorefrontApp() {
             </div>
           ))}
         </div>
-        {cart.length > 0 && !checkoutOpen && <div className="drawer-footer"><div><span>Sous-total</span><strong>{formatPrice(total)}</strong></div><p>Livraison calculée à l'étape suivante.</p><button type="button" onClick={() => setCheckoutOpen(true)}>Commander <ArrowRight size={18} /></button></div>}
+        {cart.length > 0 && !checkoutOpen && <div className="drawer-footer"><div><span>Sous-total</span><strong>{formatPrice(total)}</strong></div><p>Frais de livraison confirmés selon la distance.</p><button type="button" onClick={() => setCheckoutOpen(true)}>Commander <ArrowRight size={18} /></button></div>}
       </aside>
 
       <aside className={`mobile-menu ${menuOpen ? 'open' : ''}`} aria-hidden={!menuOpen}>

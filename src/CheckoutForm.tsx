@@ -85,6 +85,7 @@ export default function CheckoutForm({ items, onBack, onSuccess }: {
       <button className="checkout-submit" type="submit" disabled={loading}>
         {loading ? <><LoaderCircle className="spinning" size={18} /> Enregistrement...</> : 'Confirmer la commande'}
       </button>
+      <p className="checkout-privacy">Les frais de livraison seront confirmés selon la distance à parcourir.</p>
       <p className="checkout-privacy">Vos données servent uniquement au traitement de cette commande.</p>
     </form>
   )
