@@ -135,19 +135,22 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState(product?.imageUrl || '')
 
-  useEffect(() => {
-    return () => {
-      if (imagePreview.startsWith('blob:')) URL.revokeObjectURL(imagePreview)
-    }
-  }, [imagePreview])
-
   const setField = <Key extends keyof ProductInput>(key: Key, value: ProductInput[Key]) => {
     setDraft((current) => ({ ...current, [key]: value }))
   }
 
   const selectImage = (file: File | null) => {
     setImageFile(file)
-    setImagePreview(file ? URL.createObjectURL(file) : product?.imageUrl || '')
+    if (!file) {
+      setImagePreview(product?.imageUrl || '')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.addEventListener('load', () => {
+      setImagePreview(typeof reader.result === 'string' ? reader.result : '')
+    })
+    reader.readAsDataURL(file)
   }
 
   const submit = async (event: FormEvent) => {
