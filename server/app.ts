@@ -52,17 +52,22 @@ app.use((_request, response) => {
 
 app.use((error: unknown, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
   void _next
-  const databaseError = error as Partial<DatabaseError>
+  const requestError = error as Partial<DatabaseError> & { type?: string }
 
-  if (databaseError.code === '23505') {
-    response.status(409).json({ message: 'Cette référence, ce slug ou cette adresse existe déjà.' })
+  if (requestError.type === 'entity.too.large') {
+    response.status(413).json({ message: 'La photo ne doit pas dépasser 5 Mo.' })
     return
   }
-  if (databaseError.code === '23503') {
+
+  if (requestError.code === '23505') {
+    response.status(409).json({ message: 'Un produit utilise déjà cette référence ou ce slug.' })
+    return
+  }
+  if (requestError.code === '23503') {
     response.status(400).json({ message: 'La catégorie ou la ressource associée est invalide.' })
     return
   }
-  if (databaseError.code === '22P02') {
+  if (requestError.code === '22P02') {
     response.status(400).json({ message: 'L’identifiant fourni est invalide.' })
     return
   }

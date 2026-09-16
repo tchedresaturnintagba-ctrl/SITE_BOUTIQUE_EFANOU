@@ -28,6 +28,7 @@ import './Admin.css'
 
 type AdminTab = 'dashboard' | 'products' | 'orders'
 type Category = { id: string; name: string; slug: string }
+const MAX_PRODUCT_IMAGE_SIZE = 5 * 1024 * 1024
 
 const emptyProduct = (categoryId = ''): ProductInput => ({
   categoryId,
@@ -140,6 +141,14 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
   }
 
   const selectImage = (file: File | null) => {
+    setError('')
+    if (file && file.size > MAX_PRODUCT_IMAGE_SIZE) {
+      setImageFile(null)
+      setImagePreview(product?.imageUrl || '')
+      setError('La photo ne doit pas dépasser 5 Mo.')
+      return
+    }
+
     setImageFile(file)
     if (!file) {
       setImagePreview(product?.imageUrl || '')
@@ -190,7 +199,7 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
             <label>Statut<select value={draft.status} onChange={(event) => setField('status', event.target.value as ProductInput['status'])}><option value="draft">Brouillon</option><option value="active">En vente</option><option value="archived">Archivé</option></select></label>
             <label>Couleur<input value={draft.color} onChange={(event) => setField('color', event.target.value)} required /></label>
             <label>Teinte<input type="color" value={draft.colorHex} onChange={(event) => setField('colorHex', event.target.value)} /></label>
-            <label className="field-wide">Photo du produit<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => selectImage(event.target.files?.[0] || null)} required={!draft.imageUrl && !draft.imageKey} /></label>
+            <label className="field-wide">Photo du produit<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0] || null; selectImage(file); if (file && file.size > MAX_PRODUCT_IMAGE_SIZE) event.target.value = '' }} required={!draft.imageUrl && !draft.imageKey} /></label>
             {imagePreview && <div className="product-image-preview field-wide"><img src={imagePreview} alt="Aperçu du produit" /></div>}
             <label>Badge<input value={draft.badge ?? ''} onChange={(event) => setField('badge', event.target.value || null)} placeholder="Nouveau" /></label>
             <label className="checkbox-field"><input type="checkbox" checked={draft.isFeatured} onChange={(event) => setField('isFeatured', event.target.checked)} /> Mettre en avant</label>
