@@ -19,8 +19,11 @@ const productSchema = z.object({
   colorHex: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   imageKey: z.string().trim().max(80).nullable().optional(),
   imageUrl: z.union([
-    z.string().url().refine((url) => new URL(url).protocol === 'https:', 'L’image doit utiliser HTTPS.'),
     z.string().regex(/^\/api\/product-images\/[0-9a-f-]{36}$/),
+    z.string().url().refine(
+      (url) => URL.canParse(url) && new URL(url).protocol === 'https:',
+      'L’image doit utiliser HTTPS.',
+    ),
   ]).nullable().optional(),
   badge: z.string().trim().max(50).nullable().optional(),
   status: z.enum(['draft', 'active', 'archived']),
