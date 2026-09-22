@@ -28,6 +28,17 @@ const productSchema = z.object({
   badge: z.string().trim().max(50).nullable().optional(),
   status: z.enum(['draft', 'active', 'archived']),
   isFeatured: z.boolean(),
+  widthCm: z.number().positive().max(1000).nullable().optional(),
+  lengthCm: z.number().positive().max(1000).nullable().optional(),
+  images: z.array(
+    z.union([
+      z.string().regex(/^\/api\/product-images\/[0-9a-f-]{36}$/),
+      z.string().url().refine(
+        (url) => URL.canParse(url) && new URL(url).protocol === 'https:',
+        'Chaque image doit utiliser HTTPS.',
+      ),
+    ]),
+  ).max(8).optional().default([]),
 }).superRefine((product, context) => {
   if (!product.imageKey && !product.imageUrl) {
     context.addIssue({ code: 'custom', path: ['imageUrl'], message: 'Une image est obligatoire.' })
@@ -122,12 +133,19 @@ adminRouter.post('/products', async (request, response) => {
     const created = await client.query<{ id: string }>(
       `INSERT INTO products (
          category_id, name, slug, sku, description, price, old_price, stock,
-         color, color_hex, image_key, image_url, badge, status, is_featured
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+         color, color_hex, image_key, image_url, badge, status, is_featured,
+         width_cm, length_cm
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        RETURNING id`,
-      [data.categoryId, data.name, data.slug, data.sku, data.description, data.price, data.oldPrice ?? null, data.stock, data.color, data.colorHex, data.imageKey ?? null, data.imageUrl ?? null, data.badge ?? null, data.status, data.isFeatured],
+      [data.categoryId, data.name, data.slug, data.sku, data.description, data.price, data.oldPrice ?? null, data.stock, data.color, data.colorHex, data.imageKey ?? null, data.imageUrl ?? null, data.badge ?? null, data.status, data.isFeatured, data.widthCm ?? null, data.lengthCm ?? null],
     )
     const productId = created.rows[0]?.id
+    for (const [index, imageUrl] of data.images.entries()) {
+      await client.query(
+        `INSERT INTO product_gallery (product_id, image_url, display_order) VALUES ($1, $2, $3)`,
+        [productId, imageUrl, index],
+      )
+    }
     await client.query(
       `INSERT INTO admin_audit_logs (admin_id, action, entity_type, entity_id, details)
        VALUES ($1, 'create', 'product', $2, $3::jsonb)`,
@@ -152,28 +170,48 @@ adminRouter.put('/products/:id', async (request, response) => {
   }
 
   const data = parsed.data
-  const result = await query<ProductRow>(
-    `UPDATE products SET
-       category_id = $1, name = $2, slug = $3, sku = $4, description = $5,
-       price = $6, old_price = $7, stock = $8, color = $9, color_hex = $10,
-       image_key = $11, image_url = $12, badge = $13, status = $14, is_featured = $15
-     WHERE id = $16
-     RETURNING id`,
-    [data.categoryId, data.name, data.slug, data.sku, data.description, data.price, data.oldPrice ?? null, data.stock, data.color, data.colorHex, data.imageKey ?? null, data.imageUrl ?? null, data.badge ?? null, data.status, data.isFeatured, request.params.id],
-  )
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    const result = await client.query<{ id: string }>(
+      `UPDATE products SET
+         category_id = $1, name = $2, slug = $3, sku = $4, description = $5,
+         price = $6, old_price = $7, stock = $8, color = $9, color_hex = $10,
+         image_key = $11, image_url = $12, badge = $13, status = $14, is_featured = $15,
+         width_cm = $16, length_cm = $17
+       WHERE id = $18
+       RETURNING id`,
+      [data.categoryId, data.name, data.slug, data.sku, data.description, data.price, data.oldPrice ?? null, data.stock, data.color, data.colorHex, data.imageKey ?? null, data.imageUrl ?? null, data.badge ?? null, data.status, data.isFeatured, data.widthCm ?? null, data.lengthCm ?? null, request.params.id],
+    )
 
-  if (!result.rows[0]) {
-    response.status(404).json({ message: 'Produit introuvable.' })
-    return
+    if (!result.rows[0]) {
+      await client.query('ROLLBACK')
+      response.status(404).json({ message: 'Produit introuvable.' })
+      return
+    }
+
+    await client.query(`DELETE FROM product_gallery WHERE product_id = $1`, [request.params.id])
+    for (const [index, imageUrl] of data.images.entries()) {
+      await client.query(
+        `INSERT INTO product_gallery (product_id, image_url, display_order) VALUES ($1, $2, $3)`,
+        [request.params.id, imageUrl, index],
+      )
+    }
+
+    await client.query(
+      `INSERT INTO admin_audit_logs (admin_id, action, entity_type, entity_id, details)
+       VALUES ($1, 'update', 'product', $2, $3::jsonb)`,
+      [request.admin?.id, request.params.id, JSON.stringify({ name: data.name, sku: data.sku })],
+    )
+    await client.query('COMMIT')
+    const product = await query<ProductRow>(`${productSelect} WHERE p.id = $1`, [request.params.id])
+    response.json({ product: product.rows[0] })
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  } finally {
+    client.release()
   }
-
-  await query(
-    `INSERT INTO admin_audit_logs (admin_id, action, entity_type, entity_id, details)
-     VALUES ($1, 'update', 'product', $2, $3::jsonb)`,
-    [request.admin?.id, request.params.id, JSON.stringify({ name: data.name, sku: data.sku })],
-  )
-  const product = await query<ProductRow>(`${productSelect} WHERE p.id = $1`, [request.params.id])
-  response.json({ product: product.rows[0] })
 })
 
 adminRouter.delete('/products/:id', async (request, response) => {

@@ -30,6 +30,7 @@ import './Admin.css'
 type AdminTab = 'dashboard' | 'products' | 'orders'
 type Category = { id: string; name: string; slug: string }
 const MAX_PRODUCT_IMAGE_SIZE = 5 * 1024 * 1024
+const MAX_GALLERY_IMAGES = 6
 
 const emptyProduct = (categoryId = ''): ProductInput => ({
   categoryId,
@@ -47,6 +48,9 @@ const emptyProduct = (categoryId = ''): ProductInput => ({
   badge: null,
   status: 'draft',
   isFeatured: false,
+  widthCm: null,
+  lengthCm: null,
+  images: [],
 })
 
 const formatPrice = (price: number) => `${new Intl.NumberFormat('fr-FR').format(price)} FCFA`
@@ -131,11 +135,15 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
     badge: product.badge,
     status: product.status,
     isFeatured: product.isFeatured,
+    widthCm: product.widthCm,
+    lengthCm: product.lengthCm,
+    images: product.images,
   } : emptyProduct(categories[0]?.id))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState(product?.imageUrl || '')
+  const [galleryUploading, setGalleryUploading] = useState(false)
 
   const setField = <Key extends keyof ProductInput>(key: Key, value: ProductInput[Key]) => {
     setDraft((current) => ({ ...current, [key]: value }))
@@ -161,6 +169,42 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
       setImagePreview(typeof reader.result === 'string' ? reader.result : '')
     })
     reader.readAsDataURL(file)
+  }
+
+  const addGalleryImages = async (files: FileList | null) => {
+    if (!files || !files.length) return
+    setError('')
+    const list = Array.from(files)
+
+    if (draft.images.length + list.length > MAX_GALLERY_IMAGES) {
+      setError(`Vous pouvez ajouter au maximum ${MAX_GALLERY_IMAGES} photos dans la galerie.`)
+      return
+    }
+    if (list.some((file) => file.size > MAX_PRODUCT_IMAGE_SIZE)) {
+      setError('Chaque photo de la galerie ne doit pas dépasser 5 Mo.')
+      return
+    }
+
+    setGalleryUploading(true)
+    try {
+      const uploaded: string[] = []
+      for (const file of list) uploaded.push(await onUpload(file))
+      setField('images', [...draft.images, ...uploaded])
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Téléversement de la galerie impossible.')
+    } finally {
+      setGalleryUploading(false)
+    }
+  }
+
+  const removeGalleryImage = (url: string) => setField('images', draft.images.filter((image) => image !== url))
+
+  const moveGalleryImage = (index: number, direction: -1 | 1) => {
+    const target = index + direction
+    if (target < 0 || target >= draft.images.length) return
+    const next = [...draft.images]
+    ;[next[index], next[target]] = [next[target]!, next[index]!]
+    setField('images', next)
   }
 
   const submit = async (event: FormEvent) => {
@@ -202,6 +246,33 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
             <label>Teinte<input type="color" value={draft.colorHex} onChange={(event) => setField('colorHex', event.target.value)} /></label>
             <label className="field-wide">Photo du produit<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0] || null; selectImage(file); if (file && file.size > MAX_PRODUCT_IMAGE_SIZE) event.target.value = '' }} required={!draft.imageUrl && !draft.imageKey} /></label>
             {imagePreview && <div className="product-image-preview field-wide"><img src={imagePreview} alt="Aperçu du produit" /></div>}
+            <label>Largeur (cm)<input type="number" min="0" step="0.5" value={draft.widthCm ?? ''} onChange={(event) => setField('widthCm', event.target.value ? Number(event.target.value) : null)} /></label>
+            <label>Longueur (cm)<input type="number" min="0" step="0.5" value={draft.lengthCm ?? ''} onChange={(event) => setField('lengthCm', event.target.value ? Number(event.target.value) : null)} /></label>
+            <label className="field-wide">
+              Galerie photo (le client peut faire défiler ces photos sur la fiche produit)
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                disabled={galleryUploading || draft.images.length >= MAX_GALLERY_IMAGES}
+                onChange={(event) => { void addGalleryImages(event.target.files); event.target.value = '' }}
+              />
+            </label>
+            {galleryUploading && <p className="field-wide gallery-uploading">Téléversement en cours...</p>}
+            {draft.images.length > 0 && (
+              <div className="gallery-preview field-wide">
+                {draft.images.map((url, index) => (
+                  <div className="gallery-thumb" key={url}>
+                    <img src={url} alt={`Photo galerie ${index + 1}`} />
+                    <div className="gallery-thumb-actions">
+                      <button type="button" onClick={() => moveGalleryImage(index, -1)} disabled={index === 0} aria-label="Déplacer avant">←</button>
+                      <button type="button" onClick={() => removeGalleryImage(url)} aria-label="Supprimer cette photo"><X size={13} /></button>
+                      <button type="button" onClick={() => moveGalleryImage(index, 1)} disabled={index === draft.images.length - 1} aria-label="Déplacer après">→</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             <label>Badge<input value={draft.badge ?? ''} onChange={(event) => setField('badge', event.target.value || null)} placeholder="Nouveau" /></label>
             <label className="checkbox-field"><input type="checkbox" checked={draft.isFeatured} onChange={(event) => setField('isFeatured', event.target.checked)} /> Mettre en avant</label>
           </div>

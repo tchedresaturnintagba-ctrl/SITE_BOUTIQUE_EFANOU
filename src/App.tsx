@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   Check,
+  ChevronLeft,
+  ChevronRight,
   CircleHelp,
   Heart,
   Leaf,
@@ -11,6 +13,7 @@ import {
   PackageCheck,
   Phone,
   Plus,
+  Ruler,
   Search,
   ShieldCheck,
   ShoppingBag,
@@ -42,21 +45,24 @@ type Product = {
   price: number
   oldPrice?: number
   image: string
+  images: string[]
   badge?: string
   color: string
   colorHex: string
   description: string
+  widthCm?: number
+  lengthCm?: number
 }
 
 type CartItem = Product & { quantity: number }
 
 const products: Product[] = [
-  { id: 'local-classic', name: 'Le Classique', category: 'Repas', price: 12500, oldPrice: 15000, image: classicImage, badge: 'Bestseller', color: 'Vert forêt', colorHex: '#315f3c', description: 'Format quotidien, doublure isolante et poche frontale pratique.' },
-  { id: 'local-family', name: 'Le Familial', category: 'Pique-nique', price: 19000, image: familyImage, badge: 'Nouveau', color: 'Beige naturel', colorHex: '#cfb998', description: 'Un grand volume pour partager repas, boissons et goûters.' },
-  { id: 'local-urban', name: "L'Urbain", category: 'Repas', price: 14500, image: urbanImage, color: 'Noir profond', colorHex: '#292b2c', description: 'Une silhouette sobre pensée pour le bureau et les déplacements.' },
-  { id: 'local-compact', name: 'Le Compact', category: 'Repas', price: 9500, image: compactImage, badge: 'Petit prix', color: 'Bleu lagon', colorHex: '#58aab4', description: 'Léger et facile à porter, sans compromis sur la fraîcheur.' },
-  { id: 'local-delivery', name: 'Le Coursier', category: 'Livraison', price: 28000, image: deliveryImage, color: 'Noir carbone', colorHex: '#292b2c', description: 'Maintien renforcé et grande capacité pour vos livraisons.' },
-  { id: 'local-picnic', name: 'La Virée', category: 'Pique-nique', price: 22000, image: picnicImage, color: 'Orange solaire', colorHex: '#d9772b', description: 'Un sac généreux conçu pour les sorties et les longues journées.' },
+  { id: 'local-classic', name: 'Le Classique', category: 'Repas', price: 12500, oldPrice: 15000, image: classicImage, images: [], badge: 'Bestseller', color: 'Vert forêt', colorHex: '#315f3c', description: 'Format quotidien, doublure isolante et poche frontale pratique.' },
+  { id: 'local-family', name: 'Le Familial', category: 'Pique-nique', price: 19000, image: familyImage, images: [], badge: 'Nouveau', color: 'Beige naturel', colorHex: '#cfb998', description: 'Un grand volume pour partager repas, boissons et goûters.' },
+  { id: 'local-urban', name: "L'Urbain", category: 'Repas', price: 14500, image: urbanImage, images: [], color: 'Noir profond', colorHex: '#292b2c', description: 'Une silhouette sobre pensée pour le bureau et les déplacements.' },
+  { id: 'local-compact', name: 'Le Compact', category: 'Repas', price: 9500, image: compactImage, images: [], badge: 'Petit prix', color: 'Bleu lagon', colorHex: '#58aab4', description: 'Léger et facile à porter, sans compromis sur la fraîcheur.' },
+  { id: 'local-delivery', name: 'Le Coursier', category: 'Livraison', price: 28000, image: deliveryImage, images: [], color: 'Noir carbone', colorHex: '#292b2c', description: 'Maintien renforcé et grande capacité pour vos livraisons.' },
+  { id: 'local-picnic', name: 'La Virée', category: 'Pique-nique', price: 22000, image: picnicImage, images: [], color: 'Orange solaire', colorHex: '#d9772b', description: 'Un sac généreux conçu pour les sorties et les longues journées.' },
 ]
 
 const productImages: Record<string, string> = {
@@ -71,6 +77,70 @@ const productImages: Record<string, string> = {
 const categories: Category[] = ['Tous', 'Repas', 'Livraison', 'Pique-nique']
 const formatPrice = (price: number) => `${new Intl.NumberFormat('fr-FR').format(price)} FCFA`
 
+function ProductQuickView({ product, onClose, onAdd }: { product: Product; onClose: () => void; onAdd: (product: Product) => void }) {
+  const [index, setIndex] = useState(0)
+  const touchStartX = useRef<number | null>(null)
+  const images = product.images.length ? product.images : [product.image]
+
+  useEffect(() => { setIndex(0) }, [product.id])
+
+  const go = (direction: 1 | -1) => setIndex((current) => (current + direction + images.length) % images.length)
+
+  return (
+    <div className="page-overlay quickview-overlay" role="presentation" onClick={onClose}>
+      <section
+        className="quickview-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quickview-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="icon-button quickview-close" type="button" onClick={onClose} aria-label="Fermer"><X size={20} /></button>
+        <div
+          className="quickview-gallery"
+          onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null }}
+          onTouchEnd={(event) => {
+            if (touchStartX.current === null) return
+            const delta = (event.changedTouches[0]?.clientX ?? touchStartX.current) - touchStartX.current
+            if (delta > 40) go(-1)
+            else if (delta < -40) go(1)
+            touchStartX.current = null
+          }}
+        >
+          <img src={images[index]} alt={`${product.name}, photo ${index + 1} sur ${images.length}`} />
+          {images.length > 1 && (
+            <>
+              <button className="quickview-nav prev" type="button" onClick={() => go(-1)} aria-label="Photo précédente"><ChevronLeft size={22} /></button>
+              <button className="quickview-nav next" type="button" onClick={() => go(1)} aria-label="Photo suivante"><ChevronRight size={22} /></button>
+              <div className="quickview-dots">
+                {images.map((image, dotIndex) => (
+                  <button key={image} className={dotIndex === index ? 'active' : ''} type="button" onClick={() => setIndex(dotIndex)} aria-label={`Aller à la photo ${dotIndex + 1}`} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        <div className="quickview-info">
+          <p className="product-category">{product.category}</p>
+          <h2 id="quickview-title">{product.name}</h2>
+          <p className="product-description">{product.description}</p>
+          <p className="product-color"><span style={{ background: product.colorHex }} />{product.color}</p>
+          {(product.widthCm || product.lengthCm) && (
+            <p className="quickview-dimensions">
+              <Ruler size={16} />
+              {product.widthCm ? `Largeur ${product.widthCm} cm` : ''}
+              {product.widthCm && product.lengthCm ? ' · ' : ''}
+              {product.lengthCm ? `Longueur ${product.lengthCm} cm` : ''}
+            </p>
+          )}
+          <p className="product-price"><strong>{formatPrice(product.price)}</strong>{product.oldPrice && <del>{formatPrice(product.oldPrice)}</del>}</p>
+          <button className="primary-button quickview-add" type="button" onClick={() => { onAdd(product); onClose() }}><Plus size={18} /> Ajouter au panier</button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function StorefrontApp() {
   const [category, setCategory] = useState<Category>('Tous')
   const [query, setQuery] = useState('')
@@ -81,6 +151,7 @@ function StorefrontApp() {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
 
   const visibleProducts = catalogue.filter((product) =>
     (category === 'Tous' || product.category === category) &&
@@ -103,10 +174,13 @@ function StorefrontApp() {
             price: product.price,
             oldPrice: product.oldPrice ?? undefined,
             image: product.imageUrl || productImages[product.imageKey || ''] || heroImage,
+            images: product.images,
             badge: product.badge ?? undefined,
             color: product.color,
             colorHex: product.colorHex,
             description: product.description,
+            widthCm: product.widthCm ?? undefined,
+            lengthCm: product.lengthCm ?? undefined,
           }]
         })
         if (nextProducts.length) setCatalogue(nextProducts)
@@ -122,9 +196,9 @@ function StorefrontApp() {
   }, [notice])
 
   useEffect(() => {
-    document.body.classList.toggle('no-scroll', cartOpen || menuOpen)
+    document.body.classList.toggle('no-scroll', cartOpen || menuOpen || Boolean(quickViewProduct))
     return () => document.body.classList.remove('no-scroll')
-  }, [cartOpen, menuOpen])
+  }, [cartOpen, menuOpen, quickViewProduct])
 
   const addToCart = (product: Product) => {
     setCart((current) => {
@@ -211,11 +285,11 @@ function StorefrontApp() {
 
           <div className="product-grid">
             {visibleProducts.map((product) => (
-              <article className="product-card" key={product.id}>
+              <article className="product-card" key={product.id} onClick={() => setQuickViewProduct(product)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === 'Enter') setQuickViewProduct(product) }} aria-label={`Voir ${product.name}`}>
                 <div className="product-image-wrap">
                   <img src={product.image} alt={`Sac isotherme ${product.name}`} />
                   {product.badge && <span className="product-badge">{product.badge}</span>}
-                  <button className={`favorite-button ${favorites.includes(product.id) ? 'selected' : ''}`} type="button" onClick={() => setFavorites((current) => current.includes(product.id) ? current.filter((id) => id !== product.id) : [...current, product.id])} aria-label="Ajouter aux favoris">
+                  <button className={`favorite-button ${favorites.includes(product.id) ? 'selected' : ''}`} type="button" onClick={(event) => { event.stopPropagation(); setFavorites((current) => current.includes(product.id) ? current.filter((id) => id !== product.id) : [...current, product.id]) }} aria-label="Ajouter aux favoris">
                     <Heart size={19} fill={favorites.includes(product.id) ? 'currentColor' : 'none'} />
                   </button>
                 </div>
@@ -226,7 +300,7 @@ function StorefrontApp() {
                   <p className="product-color"><span style={{ background: product.colorHex }} />{product.color}</p>
                   <div className="product-footer">
                     <p className="product-price"><strong>{formatPrice(product.price)}</strong>{product.oldPrice && <del>{formatPrice(product.oldPrice)}</del>}</p>
-                    <button className="add-button" type="button" onClick={() => addToCart(product)} aria-label={`Ajouter ${product.name} au panier`}><Plus size={20} /></button>
+                    <button className="add-button" type="button" onClick={(event) => { event.stopPropagation(); addToCart(product) }} aria-label={`Ajouter ${product.name} au panier`}><Plus size={20} /></button>
                   </div>
                 </div>
               </article>
@@ -312,6 +386,10 @@ function StorefrontApp() {
         <div className="footer-column"><h3>Nous retrouver</h3><a href="tel:+22896339899"><Phone size={15} /> +228 96 33 98 99</a><a href="https://tiktok.com/@horizonefanou" target="_blank" rel="noreferrer">TikTok</a></div>
         <div className="footer-bottom"><span>© 2026 Horizon Efanou</span><span>Paiement sécurisé · Mixx by Yas · Flooz</span></div>
       </footer>
+
+      {quickViewProduct && (
+        <ProductQuickView product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAdd={addToCart} />
+      )}
 
       {(cartOpen || menuOpen) && <button className="page-overlay" type="button" aria-label="Fermer" onClick={closePanels} />}
 
