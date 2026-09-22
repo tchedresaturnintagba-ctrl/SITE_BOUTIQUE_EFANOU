@@ -9,6 +9,9 @@ const environmentSchema = z.object({
   DATABASE_SSL: z.enum(['true', 'false']).default('false'),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET doit contenir au moins 32 caractères'),
   JWT_EXPIRES_IN: z.string().default('8h'),
+  RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM_EMAIL: z.string().default('onboarding@resend.dev'),
+  ADMIN_NOTIFICATION_EMAIL: z.string().default('masetogo35@gmail.com'),
 })
 
 const parsedEnvironment = environmentSchema.safeParse(process.env)

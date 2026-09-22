@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { pool } from '../db.js'
+import { sendOrderEmailNotification } from '../services/email.js'
 
 const orderSchema = z.object({
   customerName: z.string().trim().min(2).max(120),
@@ -129,6 +130,16 @@ ordersRouter.post('/orders', async (request, response) => {
     }
 
     await client.query('COMMIT')
+
+    await sendOrderEmailNotification({
+      orderNumber: order.orderNumber,
+      total: order.total,
+      customerName: parsed.data.customerName,
+      customerPhone: parsed.data.customerPhone,
+      paymentMethod: parsed.data.paymentMethod,
+      items: lines.map((line) => ({ name: line.product.name, quantity: line.quantity })),
+    })
+
     response.status(201).json({ order })
   } catch (error) {
     await client.query('ROLLBACK')
