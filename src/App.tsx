@@ -27,6 +27,7 @@ import urbanImage from '../WhatsApp Image 2026-07-24 at 07.57.54.jpeg'
 import compactImage from '../WhatsApp Image 2026-07-24 at 07.59.02.jpeg'
 import deliveryImage from '../WhatsApp Image 2026-07-24 at 07.59.03.jpeg'
 import picnicImage from '../WhatsApp Image 2026-07-24 at 07.59.43.jpeg'
+import logo from './assets/logo.jpg'
 import AdminApp from './admin/AdminApp'
 import { storefrontApi } from './api'
 import CheckoutForm from './CheckoutForm'
@@ -157,8 +158,7 @@ function StorefrontApp() {
 
       <header className="site-header">
         <a className="brand" href="#accueil" aria-label="Horizon Efanou, accueil">
-          <span className="brand-main">Horizon <em>Efanou</em></span>
-          <span className="brand-tagline">Fraîcheur · Style · Partout</span>
+          <img className="brand-logo" src={logo} alt="Horizon Efanou" />
         </a>
         <nav className="desktop-nav" aria-label="Navigation principale">
           <a href="#boutique">Boutique</a>
@@ -304,7 +304,7 @@ function StorefrontApp() {
 
       <footer className="site-footer">
         <div className="footer-brand">
-          <a className="brand light" href="#accueil"><span className="brand-main">Horizon <em>Efanou</em></span><span className="brand-tagline">Fraîcheur · Style · Partout</span></a>
+          <a className="brand light" href="#accueil"><img className="brand-logo brand-logo-on-dark" src={logo} alt="Horizon Efanou" /></a>
           <p>Les sacs isothermes qui prennent soin de vos repas et de votre style.</p>
         </div>
         <div className="footer-column"><h3>Explorer</h3><a href="#boutique">La boutique</a><a href="#histoire">Notre histoire</a><a href="#engagements">Nos engagements</a></div>
@@ -334,7 +334,7 @@ function StorefrontApp() {
       </aside>
 
       <aside className={`mobile-menu ${menuOpen ? 'open' : ''}`} aria-hidden={!menuOpen}>
-        <div className="drawer-header"><span className="brand-main">Horizon <em>Efanou</em></span><button className="icon-button" type="button" onClick={() => setMenuOpen(false)} aria-label="Fermer le menu"><X size={22} /></button></div>
+        <div className="drawer-header"><img className="brand-logo" src={logo} alt="Horizon Efanou" /><button className="icon-button" type="button" onClick={() => setMenuOpen(false)} aria-label="Fermer le menu"><X size={22} /></button></div>
         <nav>
           <a href="#boutique" onClick={() => setMenuOpen(false)}>Boutique <ArrowRight size={18} /></a>
           <a href="#histoire" onClick={() => setMenuOpen(false)}>Notre histoire <ArrowRight size={18} /></a>

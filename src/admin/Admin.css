@@ -20,6 +20,8 @@
 .login-brand > div span, .admin-loading > span { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 700; }
 .login-brand em, .admin-loading em, .admin-logo em { color: var(--admin-gold); font-weight: 600; }
 .login-brand p { margin: 14px 0 0; color: #b7c8ba; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; }
+.admin-brand-logo { height: 92px; width: auto; display: block; border-radius: 16px; background: var(--admin-paper); padding: 8px 12px; }
+.admin-loading-logo { height: 70px; width: auto; display: block; }
 .login-panel { padding: 60px 8vw; display: grid; place-items: center; background: #fffdf8; }
 .login-panel form { width: min(420px, 100%); }
 .admin-kicker { margin: 0 0 10px; color: #b97212; font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
@@ -48,9 +50,10 @@
 
 .admin-shell { display: grid; grid-template-columns: 245px minmax(0, 1fr); }
 .admin-sidebar { height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; background: var(--admin-forest); color: #c4d2c7; }
-.admin-logo { height: 102px; padding: 26px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.admin-logo { height: 102px; padding: 20px 26px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
 .admin-logo span { font-family: 'Playfair Display', serif; color: white; font-size: 23px; font-weight: 700; }
 .admin-logo p { margin: 7px 0 0; font-size: 8px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.admin-sidebar-logo { height: 48px; width: auto; display: block; border-radius: 10px; background: var(--admin-paper); padding: 5px 8px; }
 .admin-sidebar nav { padding: 24px 12px; display: flex; flex-direction: column; gap: 5px; }
 .admin-sidebar nav button, .sidebar-footer a, .sidebar-footer button { min-height: 44px; padding: 0 13px; border: 0; display: flex; align-items: center; gap: 12px; background: transparent; color: inherit; font-size: 12px; text-align: left; }
 .admin-sidebar nav button { position: relative; }

@@ -81,6 +81,8 @@ img { display: block; max-width: 100%; }
   align-items: center;
   color: var(--forest-deep);
 }
+.brand-logo { height: 58px; width: auto; display: block; }
+.brand-logo-on-dark { height: 68px; border-radius: 14px; background: var(--paper); padding: 6px 10px; }
 .brand-main {
   font-family: 'Playfair Display', serif;
   font-size: 24px;
@@ -435,6 +437,7 @@ img { display: block; max-width: 100%; }
   .site-header { height: 67px; padding: 0 14px; }
   .brand-main { font-size: 20px; }
   .brand-tagline { margin-top: 5px; font-size: 6px; letter-spacing: 1.4px; }
+  .brand-logo { height: 44px; }
   .header-actions { gap: 0; }
   .desktop-only { display: none; }
   .hero-section { height: calc(100svh - 97px); min-height: 570px; }

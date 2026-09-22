@@ -24,6 +24,7 @@ import {
   type DashboardData,
   type ProductInput,
 } from '../api'
+import logo from '../assets/logo.jpg'
 import './Admin.css'
 
 type AdminTab = 'dashboard' | 'products' | 'orders'
@@ -90,7 +91,7 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
     <main className="admin-login">
       <section className="login-brand">
         <a href="/"><ArrowLeft size={18} /> Retour à la boutique</a>
-        <div><span>Horizon <em>Efanou</em></span><p>Administration de la boutique</p></div>
+        <div><img className="admin-brand-logo" src={logo} alt="Horizon Efanou" /><p>Administration de la boutique</p></div>
       </section>
       <section className="login-panel">
         <form onSubmit={submit}>
@@ -259,7 +260,7 @@ export default function AdminApp() {
   }, [token])
 
   if (!token) return <Login onLogin={(nextToken) => { setLoading(true); setToken(nextToken) }} />
-  if (loading) return <div className="admin-loading"><span>Horizon <em>Efanou</em></span><p>Chargement de l'administration...</p></div>
+  if (loading) return <div className="admin-loading"><img className="admin-loading-logo" src={logo} alt="Horizon Efanou" /><p>Chargement de l'administration...</p></div>
 
   const refreshProducts = async () => setProducts((await adminApi.products(token)).products)
   const refreshOrders = async () => setOrders((await adminApi.orders(token)).orders)
@@ -282,7 +283,7 @@ export default function AdminApp() {
   return (
     <div className="admin-shell">
       <aside className={`admin-sidebar ${menuOpen ? 'open' : ''}`}>
-        <div className="admin-logo"><span>Horizon <em>Efanou</em></span><p>Administration</p></div>
+        <div className="admin-logo"><img className="admin-sidebar-logo" src={logo} alt="Horizon Efanou" /><p>Administration</p></div>
         <nav>
           <button className={tab === 'dashboard' ? 'active' : ''} onClick={() => { setTab('dashboard'); setMenuOpen(false) }}><LayoutDashboard size={19} /> Vue d'ensemble</button>
           <button className={tab === 'products' ? 'active' : ''} onClick={() => { setTab('products'); setMenuOpen(false) }}><Package size={19} /> Produits</button>
