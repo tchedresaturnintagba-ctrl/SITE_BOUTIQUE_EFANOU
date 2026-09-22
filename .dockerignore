@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+dist-server
+.env
+.env.*
+!.env.example
+*.local
+.git
+.vscode
+.idea
+npm-debug.log*
+*.log
+README.md

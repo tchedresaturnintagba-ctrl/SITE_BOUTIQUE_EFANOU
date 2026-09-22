@@ -17,5 +17,22 @@ services:
       timeout: 5s
       retries: 10
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: horizon-efanou-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/Boutique_Horizon%20Efanou"
+    ports:
+      - "3001:3001"
+
 volumes:
   horizon_efanou_data:
