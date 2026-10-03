@@ -247,7 +247,7 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
             <label className="field-wide">Photo du produit<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0] || null; selectImage(file); if (file && file.size > MAX_PRODUCT_IMAGE_SIZE) event.target.value = '' }} required={!draft.imageUrl && !draft.imageKey} /></label>
             {imagePreview && <div className="product-image-preview field-wide"><img src={imagePreview} alt="Aperçu du produit" /></div>}
             <label>Mesure<input type="number" min="0" step="0.5" value={draft.widthCm ?? ''} onChange={(event) => setField('widthCm', event.target.value ? Number(event.target.value) : null)} /></label>
-            <label>Mesure (Litre)<input type="number" min="0" step="0.5" value={draft.lengthCm ?? ''} onChange={(event) => setField('lengthCm', event.target.value ? Number(event.target.value) : null)} /></label>
+            <label>Volume (Litre)<input type="number" min="0" step="0.5" value={draft.lengthCm ?? ''} onChange={(event) => setField('lengthCm', event.target.value ? Number(event.target.value) : null)} /></label>
             <label className="field-wide">
               Galerie photo (le client peut faire défiler ces photos sur la fiche produit)
               <input
