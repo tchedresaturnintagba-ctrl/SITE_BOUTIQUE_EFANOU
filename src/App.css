@@ -360,7 +360,9 @@ img { display: block; max-width: 100%; }
 .quickview-info { padding: 34px 30px; display: flex; flex-direction: column; }
 .quickview-info h2 { margin: 6px 0 12px; font-family: 'Playfair Display', serif; font-size: 27px; color: var(--forest-deep); }
 .quickview-info .product-description { min-height: 0; }
-.quickview-dimensions { margin: 0 0 17px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.quickview-spec { margin: 0 0 14px; display: flex; align-items: flex-start; gap: 10px; color: var(--muted); }
+.quickview-spec h3 { margin: 0 0 2px; font-size: 13px; color: inherit; }
+.quickview-spec p { margin: 0; font-size: 14px; }
 .quickview-info .product-price { margin: 4px 0 22px; flex-direction: row; align-items: baseline; gap: 10px; }
 .quickview-info .product-price strong { font-size: 22px; }
 .quickview-add { width: 100%; margin-top: auto; }

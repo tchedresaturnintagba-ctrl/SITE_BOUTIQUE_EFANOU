@@ -20,8 +20,8 @@ export type ProductRow = {
   badge: string | null
   status: 'draft' | 'active' | 'archived'
   isFeatured: boolean
-  widthCm: number | null
-  lengthCm: number | null
+  dimensions: string | null
+  capacity: string | null
   images: string[]
   createdAt: string
   updatedAt: string
@@ -46,8 +46,8 @@ export const productSelect = `
     p.badge,
     p.status,
     p.is_featured AS "isFeatured",
-    p.width_cm::float8 AS "widthCm",
-    p.length_cm::float8 AS "lengthCm",
+    p.dimensions,
+    p.capacity,
     COALESCE(
       (SELECT json_agg(g.image_url ORDER BY g.display_order)
        FROM product_gallery g WHERE g.product_id = p.id),

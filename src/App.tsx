@@ -50,8 +50,8 @@ type Product = {
   color: string
   colorHex: string
   description: string
-  widthCm?: number
-  lengthCm?: number
+  dimensions?: string
+  capacity?: string
 }
 
 type CartItem = Product & { quantity: number }
@@ -125,13 +125,11 @@ function ProductQuickView({ product, onClose, onAdd }: { product: Product; onClo
           <h2 id="quickview-title">{product.name}</h2>
           <p className="product-description">{product.description}</p>
           <p className="product-color"><span style={{ background: product.colorHex }} />{product.color}</p>
-          {(product.widthCm || product.lengthCm) && (
-            <p className="quickview-dimensions">
-              <Ruler size={16} />
-              {product.widthCm ? `Largeur ${product.widthCm} cm` : ''}
-              {product.widthCm && product.lengthCm ? ' · ' : ''}
-              {product.lengthCm ? `Longueur ${product.lengthCm} cm` : ''}
-            </p>
+          {product.dimensions && (
+            <div className="quickview-spec"><Ruler size={16} /><div><h3>Dimensions</h3><p>{product.dimensions}</p></div></div>
+          )}
+          {product.capacity && (
+            <div className="quickview-spec"><Ruler size={16} /><div><h3>Contenance</h3><p>{product.capacity}</p></div></div>
           )}
           <p className="product-price"><strong>{formatPrice(product.price)}</strong>{product.oldPrice && <del>{formatPrice(product.oldPrice)}</del>}</p>
           <button className="primary-button quickview-add" type="button" onClick={() => { onAdd(product); onClose() }}><Plus size={18} /> Ajouter au panier</button>
@@ -179,8 +177,8 @@ function StorefrontApp() {
             color: product.color,
             colorHex: product.colorHex,
             description: product.description,
-            widthCm: product.widthCm ?? undefined,
-            lengthCm: product.lengthCm ?? undefined,
+            dimensions: product.dimensions ?? undefined,
+            capacity: product.capacity ?? undefined,
           }]
         })
         if (nextProducts.length) setCatalogue(nextProducts)

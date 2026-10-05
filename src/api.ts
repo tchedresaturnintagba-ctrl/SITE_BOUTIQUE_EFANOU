@@ -21,8 +21,8 @@ export type ApiProduct = {
   badge: string | null
   status: 'draft' | 'active' | 'archived'
   isFeatured: boolean
-  widthCm: number | null
-  lengthCm: number | null
+  dimensions: string | null
+  capacity: string | null
   images: string[]
   createdAt: string
   updatedAt: string

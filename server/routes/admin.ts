@@ -28,8 +28,8 @@ const productSchema = z.object({
   badge: z.string().trim().max(50).nullable().optional(),
   status: z.enum(['draft', 'active', 'archived']),
   isFeatured: z.boolean(),
-  widthCm: z.number().positive().max(1000).nullable().optional(),
-  lengthCm: z.number().positive().max(1000).nullable().optional(),
+  dimensions: z.string().trim().max(60).nullable().optional(),
+  capacity: z.string().trim().max(40).nullable().optional(),
   images: z.array(
     z.union([
       z.string().regex(/^\/api\/product-images\/[0-9a-f-]{36}$/),
@@ -134,10 +134,10 @@ adminRouter.post('/products', async (request, response) => {
       `INSERT INTO products (
          category_id, name, slug, sku, description, price, old_price, stock,
          color, color_hex, image_key, image_url, badge, status, is_featured,
-         width_cm, length_cm
+         dimensions, capacity
        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        RETURNING id`,
-      [data.categoryId, data.name, data.slug, data.sku, data.description, data.price, data.oldPrice ?? null, data.stock, data.color, data.colorHex, data.imageKey ?? null, data.imageUrl ?? null, data.badge ?? null, data.status, data.isFeatured, data.widthCm ?? null, data.lengthCm ?? null],
+      [data.categoryId, data.name, data.slug, data.sku, data.description, data.price, data.oldPrice ?? null, data.stock, data.color, data.colorHex, data.imageKey ?? null, data.imageUrl ?? null, data.badge ?? null, data.status, data.isFeatured, data.dimensions || null, data.capacity || null],
     )
     const productId = created.rows[0]?.id
     for (const [index, imageUrl] of data.images.entries()) {
@@ -178,10 +178,10 @@ adminRouter.put('/products/:id', async (request, response) => {
          category_id = $1, name = $2, slug = $3, sku = $4, description = $5,
          price = $6, old_price = $7, stock = $8, color = $9, color_hex = $10,
          image_key = $11, image_url = $12, badge = $13, status = $14, is_featured = $15,
-         width_cm = $16, length_cm = $17
+         dimensions = $16, capacity = $17
        WHERE id = $18
        RETURNING id`,
-      [data.categoryId, data.name, data.slug, data.sku, data.description, data.price, data.oldPrice ?? null, data.stock, data.color, data.colorHex, data.imageKey ?? null, data.imageUrl ?? null, data.badge ?? null, data.status, data.isFeatured, data.widthCm ?? null, data.lengthCm ?? null, request.params.id],
+      [data.categoryId, data.name, data.slug, data.sku, data.description, data.price, data.oldPrice ?? null, data.stock, data.color, data.colorHex, data.imageKey ?? null, data.imageUrl ?? null, data.badge ?? null, data.status, data.isFeatured, data.dimensions || null, data.capacity || null, request.params.id],
     )
 
     if (!result.rows[0]) {

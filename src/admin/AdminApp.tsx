@@ -48,8 +48,8 @@ const emptyProduct = (categoryId = ''): ProductInput => ({
   badge: null,
   status: 'draft',
   isFeatured: false,
-  widthCm: null,
-  lengthCm: null,
+  dimensions: null,
+  capacity: null,
   images: [],
 })
 
@@ -135,8 +135,8 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
     badge: product.badge,
     status: product.status,
     isFeatured: product.isFeatured,
-    widthCm: product.widthCm,
-    lengthCm: product.lengthCm,
+    dimensions: product.dimensions,
+    capacity: product.capacity,
     images: product.images,
   } : emptyProduct(categories[0]?.id))
   const [saving, setSaving] = useState(false)
@@ -246,8 +246,8 @@ function ProductEditor({ product, categories, onClose, onSave, onUpload }: {
             <label>Teinte<input type="color" value={draft.colorHex} onChange={(event) => setField('colorHex', event.target.value)} /></label>
             <label className="field-wide">Photo du produit<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0] || null; selectImage(file); if (file && file.size > MAX_PRODUCT_IMAGE_SIZE) event.target.value = '' }} required={!draft.imageUrl && !draft.imageKey} /></label>
             {imagePreview && <div className="product-image-preview field-wide"><img src={imagePreview} alt="Aperçu du produit" /></div>}
-            <label>Mesure<input type="number" min="0" step="0.5" value={draft.widthCm ?? ''} onChange={(event) => setField('widthCm', event.target.value ? Number(event.target.value) : null)} /></label>
-            <label>Volume (Litre)<input type="number" min="0" step="0.5" value={draft.lengthCm ?? ''} onChange={(event) => setField('lengthCm', event.target.value ? Number(event.target.value) : null)} /></label>
+            <label>Dimensions<input maxLength={60} placeholder="26*17*20cm" value={draft.dimensions ?? ''} onChange={(event) => setField('dimensions', event.target.value || null)} /></label>
+            <label>Contenance<input maxLength={40} placeholder="7.5L" value={draft.capacity ?? ''} onChange={(event) => setField('capacity', event.target.value || null)} /></label>
             <label className="field-wide">
               Galerie photo (le client peut faire défiler ces photos sur la fiche produit)
               <input
